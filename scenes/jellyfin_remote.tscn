@@ -1,0 +1,7 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://Scenes/Objects/appliances/tv_remote.tscn" id="1_remote"]
+[ext_resource type="Script" path="res://mods/xenu.jellyfin/scripts/jellyfin_remote.gd" id="2_script"]
+
+[node name="JellyfinRemote" instance=ExtResource("1_remote") groups=["spawned"]]
+script = ExtResource("2_script")

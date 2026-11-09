@@ -1,0 +1,15 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://mods/xenu.jellyfin/scripts/decoder_options_panel.gd" id="1_panel"]
+[ext_resource type="PackedScene" uid="uid://clujaf3u776a3" path="res://addons/godot-xr-tools/objects/viewport_2d_in_3d.tscn" id="2_vp"]
+[ext_resource type="PackedScene" path="res://mods/xenu.jellyfin/scenes/decoder_options_2d.tscn" id="3_ui"]
+
+[node name="DecoderOptionsPanel" type="Node3D"]
+script = ExtResource("1_panel")
+
+[node name="DecoderOptionsViewport" parent="." instance=ExtResource("2_vp")]
+screen_size = Vector2(0.56, 0.62)
+scene = ExtResource("3_ui")
+viewport_size = Vector2(560, 620)
+transparent = 1
+unshaded = true
