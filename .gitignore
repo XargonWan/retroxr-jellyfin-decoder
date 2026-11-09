@@ -1,0 +1,9 @@
+src.local/
+build/
+.godot/
+*.import
+*.tmp
+finito
+TODO*.md
+dist/
+RELEASE.md
