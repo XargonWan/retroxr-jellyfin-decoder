@@ -15,6 +15,6 @@ func register(api: ModApi) -> void:
 	api.log_line("registering")
 	api.register_object(DECODER_TYPE, "res://mods/xenu.jellyfin/scenes/jellyfin_decoder.tscn",
 		{"label": "Jellyfin Decoder"})
-	# The handset for it: a clone of the TV remote that also drives the decoder (see jellyfin_remote.gd).
+	# The handset for it: the game's own TV remote, dressed with the logo (it drives the decoder through RemoteTarget) (see remote_livery.gd and decoder_remote.gd).
 	api.register_object(REMOTE_TYPE, "res://mods/xenu.jellyfin/scenes/jellyfin_remote.tscn",
 		{"label": "Jellyfin Decoder Remote"})

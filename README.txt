@@ -68,7 +68,7 @@ Files
   scripts/jf_player.gd      the video engine seam; jf_vlc_player.gd is libVLC behind it
   scripts/teletext_*.gd     the 40 x 24 page as a SubViewport texture
   scripts/jellyfin_decoder.gd  the object: a MediaTransport on the VCR's own scene
-  scripts/jellyfin_remote.gd   a clone of the TV remote that also drives the decoder
+  scripts/decoder_remote.gd, remote_livery.gd  the game's own TV remote drives the decoder (RemoteTarget); the logo on it
   scripts/decoder_keys.gd, decoder_livery.gd, logo_mesh.gd  the front and the keys
   scripts/decoder_options_*.gd the TAB menu
   assets/jellyfin_logo.json    the logo, extruded from the official SVG (tools/make_logo_mesh.py)
@@ -91,6 +91,9 @@ Playback
 Tests
   python3 tests/run_all.py  -- pure logic, the REST client over real HTTP against tests/fake_jellyfin.py, the
   object and its remote in the game, and a server that ignores Range requests. Run with Godot 4.7.2.
+
+Needs
+  - A RetroXR build that has RemoteTarget (the remote's device protocol): the game's TV remote then drives the decoder.
 
 Not yet done
   - Tested on desktop only. Not yet run on a headset or on Quest; the Quest will use a different video engine

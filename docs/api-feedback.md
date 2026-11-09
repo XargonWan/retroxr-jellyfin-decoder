@@ -33,26 +33,15 @@ object has it), same row dictionaries. What our menu needs that the row kinds do
 
 Also useful there: how to submit a field (Enter / focus lost) so a half-typed address is not sent.
 
-## 2. A TV remote that can drive something other than the four built-in classes -- medium, helps every deck mod
+## 2. A TV remote that can drive something other than the four built-in classes -- RESOLVED by 86a794ab (RemoteTarget)
 
-`tv_remote.gd` decides what it drives in four places by class: `_walk_to_device`, `_layout_for_target`, `_cell_enabled`,
-`_activate` (`RetroTV`, `VCRPlayer`, `DVDPlayer`, `RetroAudioPlayer`). A mod deck is invisible to it. We **cloned the
-whole script: 1,747 lines**, to add one device, and the clone will drift from every fix you make (it already has: the
-`desktop_menu_scale` fix below had to be copied by hand).
-
-Proposal: duck-typed hooks on the device, the same pattern as `AvSourceContract`:
-
-```
-func remote_layout() -> Array            # the cell specs _layout_for_target returns today
-func remote_cell_enabled(id) -> bool
-func remote_activate(id) -> void
-func remote_tv() -> Node                 # where the SET's own keys (power, volume, source) go: connected_tv
-```
-
-and the four class lists collapse into "has `remote_layout`". The existing classes can implement them in place, which
-also deletes the per-class branches. Our clone shows the complete surface we needed: a cell may be a glyph or a text
-(`"text": "777"`), cells can be fractional (`"span": 0.75`), and extra keys the model does not have (digits, the four
-Fastext colours) live only in the floating grid.
+Done upstream, and we moved to it: the 1,747-line clone of `tv_remote.gd` is gone; the decoder joins the group in `_init`
+and answers `remote_layout` / `remote_activate` / `remote_cell_enabled` / `remote_cell_face(s)` / `remote_key_cell`
+(`scripts/decoder_remote.gd`, ~100 lines), and the mod's remote object is the game's own remote plus a logo node. Two
+small gaps remain (see "Left over" in the notes below): the desktop keyboard's digit and F1-F4 keys (the clone typed page
+numbers with them, the base remote has no hook for a key event), and the set's keys: a deck's layout has none, so the decoder
+carries cells `power`/`source`/`vol_*`/`mute` and forwards them to `connected_tv` itself; every deck mod will want the same,
+so `RemoteTarget.tv_cells()` (a ready-made forwarding set for any device with a `connected_tv`) would save each of them the code.
 
 ## 3. `ApplianceModel`: dressing a model without reaching into it -- small, helps every re-skin
 

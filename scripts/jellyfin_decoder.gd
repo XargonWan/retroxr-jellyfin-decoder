@@ -31,6 +31,7 @@ const Keys = preload("res://mods/xenu.jellyfin/scripts/decoder_keys.gd")
 ## The VHS look is the DECK's (the TV owns the tube: scanlines, mask, glass): a deck hands the set a stage and the
 ## set runs it, as the VCR does. This is the VCR's own shader and its default values.
 const VHS_SHADER := preload("res://Shaders/vcr_effect.gdshader")
+const RemoteCells = preload("res://mods/xenu.jellyfin/scripts/decoder_remote.gd")
 const Livery = preload("res://mods/xenu.jellyfin/scripts/decoder_livery.gd")
 const OptionsPanel = preload("res://mods/xenu.jellyfin/scripts/decoder_options_panel.gd")
 
@@ -133,6 +134,36 @@ var _companion_timer := 0.0
 var _clock_timer := 0.0
 var _last_info_key := ""
 var _warned_unavailable := false
+
+
+## The game's TV remote drives anything in the group "remote_target" that answers remote_layout / remote_activate
+## (RemoteTarget.join does exactly this add_to_group; the literal keeps the box loadable on a build that has no such class).
+func _init() -> void:
+	add_to_group(&"remote_target")
+
+
+func remote_layout() -> Array:
+	return RemoteCells.layout()
+
+
+func remote_activate(id: String) -> void:
+	RemoteCells.activate(self, id)
+
+
+func remote_cell_enabled(id: String) -> bool:
+	return RemoteCells.cell_enabled(self, id)
+
+
+func remote_cell_face(id: String) -> Dictionary:
+	return RemoteCells.cell_face(self, id)
+
+
+func remote_cell_faces(id: String) -> Array:
+	return RemoteCells.cell_faces(id)
+
+
+func remote_key_cell(cell: String) -> String:
+	return RemoteCells.key_cell(cell)
 
 
 func _ready() -> void:

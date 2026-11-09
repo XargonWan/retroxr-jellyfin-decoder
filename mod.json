@@ -1,7 +1,7 @@
 {
   "id": "xenu.jellyfin",
   "name": "Jellyfin Decoder",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "Xargon",
   "description": "A VCR-style box that plays your Jellyfin library on your TV, with the menus in Teletext.",
   "api_version": 1,

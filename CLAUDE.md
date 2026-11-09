@@ -25,8 +25,10 @@ mod; phase 2 (only if the RetroXR developer approves) moves it into the base gam
 - `scripts/teletext_canvas.gd` + `teletext_view.gd` -- the page as a 512x384 SubViewport texture (UPDATE_ONCE).
 - `scripts/jellyfin_decoder.gd` -- the object: a `MediaTransport` on the VCR's own scene (`scenes/jellyfin_decoder.tscn`
   inherits `vcr_player.tscn`, swaps the script, frees the tape slot). `now_playing()` is what other mods ask.
-- `scripts/jellyfin_remote.gd` -- CLONE of `tv_remote.gd` (see "Debt on purpose"); `scenes/jellyfin_remote.tscn`
-  inherits `tv_remote.tscn`.
+- `scripts/decoder_remote.gd` -- what the decoder tells the game's TV remote through `RemoteTarget` (layout, enabled cells,
+  state faces, activation; the set's keys forwarded to `connected_tv`). `scenes/jellyfin_remote.tscn` is the game's own
+  `tv_remote.tscn` plus a child running `remote_livery.gd` (the logo); no clone, no script override. Needs a game build with
+  `RemoteTarget` (RetroXR commit 86a794ab or later).
 - `scripts/decoder_livery.gd` + `logo_mesh.gd` + `assets/jellyfin_logo.json` -- what makes it not a VCR: parts hidden
   (Door, CassetteHolder, TapeCarrier), the print atlas wiped where RETRO XR / VIDEO CASSETTE RECORDER were (in a COPY, as
   a material override: never the GLB), a faceplate over the bay AND the old display, the logo (a quarter of the strip)
@@ -112,9 +114,6 @@ files** (the TV, AV switch and cassette GLBs are Git LFS pointers in this checko
 
 ## Debt on purpose
 
-`jellyfin_remote.gd` will be a CLONE of the base game's `tv_remote.gd` (it hard-codes the device
-classes it drives, so it cannot drive a mod deck). **If this mod is ever integrated into
-RetroXR, UNIFY the two** (a duck-typed hook on the device instead of the class lists in
-`_walk_to_device`, `_layout_for_target`, `_cell_enabled`, `_activate`) and delete the clone.
-The same goes for the player: libVLC here, ExoPlayer (Media3) as a phase-2 Android backend behind
-the same `jellyfin_player` interface.
+The video player: libVLC here, ExoPlayer (Media3) as a phase-2 Android backend behind the same `jf_player` interface
+(a mod cannot ship an Android plugin). The remote is no longer a debt: it was a 1,747-line clone of `tv_remote.gd` until the
+game gained `RemoteTarget`, and the decoder now just answers it.
