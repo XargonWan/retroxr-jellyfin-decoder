@@ -84,6 +84,10 @@ files** (the TV, AV switch and cassette GLBs are Git LFS pointers in this checko
      (`tools/publish_modio.py`, secret `MODIO_PAT`; never changes visibility; a mod that does not exist there is created
      PRIVATE with the README as description and `res/thumbnail.png` as logo; game id fixed, https://mod.io/g/retroxr/;
      slug override: repository variable `MODIO_MOD_SLUG`). A mod.io failure is only a warning in the run summary.
+  **Secrets are per repository**: `MODIO_PAT` (and `MODIO_MOD_SLUG` if the slug differs) must be set with `gh secret set` /
+  `gh variable set`; without it the run is GREEN and only warns "MODIO_PAT is not set". Retry mod.io alone, once the secret
+  is set, with `gh workflow run release.yml` (manual start: zip and notes are taken from the existing release; a version
+  mod.io already has is not added twice).
   Watch the first release in the log: `flatpak-spawn --host /home/linuxbrew/.linuxbrew/bin/gh run list --repo XargonWan/retroxr-jellyfin-decoder`, `gh run view <id> --log`.
 - `res/` holds `thumbnail.png` (16:9, >= 512x288; `pack_mod.py` puts it at the zip's root and leaves the rest of `res/` out) and
   `screenshotN.png`. The README.md starts with the thumbnail (before the title) and has a Screenshots section.
