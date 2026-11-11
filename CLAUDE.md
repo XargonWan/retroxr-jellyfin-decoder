@@ -69,13 +69,28 @@ files** (the TV, AV switch and cassette GLBs are Git LFS pointers in this checko
 - `build/` and `dist/` exist locally and are **gitignored**; pack into them freely, never commit them.
 - Commits are **semantic and in English** (`feat(scope): ...`, `fix: ...`, `chore:`, `docs:`, `test:`, `res:`) and carry
   **no `Co-Authored-By`** trailer and no session link.
-- **Push to `main`.** A push to main runs `.github/workflows/release.yml` (the Synth mod's, reused): it packs the mod with
-  `tools/pack_mod.py` and publishes release `v<version in mod.json>` with the zip attached and notes from
-  `tools/release_notes.py` (feat / fix / perf commits since the previous release). It publishes only if that tag does
-  not exist yet: **bump `version` in `mod.json` in the commit that should release.**
-- Pack locally: `python3 tools/pack_mod.py --out build/xenu.jellyfin-<version>.zip` (reads it back the way the loader
-  does; 16:9 `thumbnail.png` required). To try it in the game copy the zip to `~/retroxr/mods/`. Never publish to mod.io
-  from here: the user uploads the zip.
+- Rules of the whole RetroXR mod family live in `/home/xargon/gits/RetroXR-xargon/TODO-mods-prompt.md` (Italian): read it and
+  reference it whenever a mod is created on mod.io. A mod never alters RetroXR's code: if it needs an API and would have to
+  work around it, write a technical request in English for the developer, and explain it to the user in simple Italian.
+- Develop on `main`. **Never push unless the user says so directly** (the VS Code flatpak prints credential-helper errors on
+  push but it works: check with `git fetch` and `git status -sb`). `[skip ci]` at the end of a message keeps a push from
+  releasing; the commit still counts for the computed version.
+- A push to main runs `.github/workflows/release.yml` (copied from `retroxr-mod-synth`; keep it in step with it):
+  1. the version is COMPUTED from the commits since the last release (`tools/release_notes.py --next-version`): `feat` = minor,
+     `fix`/`perf` = patch, `!` or `BREAKING CHANGE:` = major (minor while 0); `chore`/`docs`/`ci`/`test`/`res` release nothing.
+     **Do not bump `mod.json` by hand** (it counts only for a first release);
+  2. it tests the publisher (`tests/publish_modio_test.py`, `tests/release_version_test.py`), packs `dist/xenu.jellyfin-<v>.zip`,
+     writes the changelog, creates the GitHub release `v<v>`, then publishes the same zip + changelog on mod.io
+     (`tools/publish_modio.py`, secret `MODIO_PAT`; never changes visibility; a mod that does not exist there is created
+     PRIVATE with the README as description and `res/thumbnail.png` as logo; game id fixed, https://mod.io/g/retroxr/;
+     slug override: repository variable `MODIO_MOD_SLUG`). A mod.io failure is only a warning in the run summary.
+  Watch the first release in the log: `flatpak-spawn --host /home/linuxbrew/.linuxbrew/bin/gh run list --repo XargonWan/retroxr-jellyfin-decoder`, `gh run view <id> --log`.
+- `res/` holds `thumbnail.png` (16:9, >= 512x288; `pack_mod.py` puts it at the zip's root and leaves the rest of `res/` out) and
+  `screenshotN.png`. The README.md starts with the thumbnail (before the title) and has a Screenshots section.
+  Make a screenshot during tests (windowed probe, see above) whenever the look changes.
+- Pack locally: `python3 tools/pack_mod.py --version <v> --out build/xenu.jellyfin-<v>.zip` (reads it back the way the loader
+  does). **After every implementation cycle deploy the zip to `~/retroxr/mods/xenu.jellyfin.zip`** so the user can test.
+  Never publish to mod.io from here (the CI does).
 
 ## Rules that bit before
 
