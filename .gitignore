@@ -7,3 +7,4 @@ finito
 TODO*.md
 dist/
 RELEASE.md
+__pycache__/

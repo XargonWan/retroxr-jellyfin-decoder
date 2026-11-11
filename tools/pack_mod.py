@@ -3,13 +3,16 @@
 
   python3 tools/pack_mod.py                       # writes dist/xenu.jellyfin-<version>.zip
   python3 tools/pack_mod.py --out some/where.zip
+  python3 tools/pack_mod.py --version 0.19.0      # the release workflow: the version computed from the commits
 
 It mirrors RetroXR/Tools/mods/pack_mod.gd, which needs a whole RetroXR checkout and a Godot binary: a pack is
 source files only (.gd, .tscn, .json, .png and the like, the same list), laid out as mods/<id>/... and read back
 before this exits. The rules that matter, from the loader:
 
   - mod.json must parse, its id must be the folder's, and its entry script must be in the pack
-  - thumbnail.png must be a readable PNG, 16:9, at least 512x288 (the Mods page and the mod.io logo)
+  - res/thumbnail.png (kept in res/ in the repository, with the screenshots) must be a readable PNG, 16:9, at least
+    512x288 (the Mods page and the mod.io logo). It goes into the pack as mods/<id>/thumbnail.png, where the loader
+    reads it; the rest of res/ (screenshots) is for the README and stays out of the pack
   - nothing may be the game's own file (project.godot, uid_cache.bin, ...)
 
 Exit status is non-zero, and no zip is left behind, if any check fails.
@@ -25,7 +28,8 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-THUMBNAIL = "thumbnail.png"
+THUMBNAIL = "thumbnail.png"  # its name in the pack
+THUMBNAIL_SOURCE = Path("res") / THUMBNAIL  # where it lives in the repository
 THUMBNAIL_MIN = (512, 288)
 THUMBNAIL_ASPECT = 16.0 / 9.0
 # No "md": RetroXR refuses it in a pack that came from mod.io (it is also a Mega Drive ROM extension).
@@ -75,17 +79,20 @@ def collect() -> list[Path]:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--version", help="the version to put in the pack's mod.json (the release's, computed from the history)")
     ap.add_argument("--out", type=Path, help="zip to write (default: dist/xenu.jellyfin-<version>.zip)")
     args = ap.parse_args()
 
     manifest = json.loads((ROOT / "mod.json").read_text(encoding="utf-8"))
     mod_id = manifest.get("id", "")
+    if args.version:
+        manifest["version"] = args.version  # the repository's mod.json is not rewritten; only the pack carries it
     version = manifest.get("version", "")
     if not mod_id or not version:
         fail("mod.json needs an id and a version")
-    thumb = ROOT / THUMBNAIL
+    thumb = ROOT / THUMBNAIL_SOURCE
     if not thumb.is_file():
-        fail(f"no {THUMBNAIL}: every pack needs a preview image")
+        fail(f"no {THUMBNAIL_SOURCE}: every pack needs a preview image")
     err = thumbnail_error(thumb.read_bytes())
     if err:
         fail(err)
@@ -98,8 +105,12 @@ def main() -> int:
         fail("nothing to pack")
     with zipfile.ZipFile(out, "w", compression=zipfile.ZIP_DEFLATED) as z:
         for rel in members:
-            z.write(ROOT / rel, prefix + rel.as_posix())
-    print(f"[pack] wrote {out} ({len(members)} files)")
+            if rel.as_posix() == "mod.json" and args.version:
+                z.writestr(prefix + "mod.json", json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
+            else:
+                z.write(ROOT / rel, prefix + rel.as_posix())
+        z.write(thumb, prefix + THUMBNAIL)
+    print(f"[pack] wrote {out} ({len(members) + 1} files)")
 
     # Read it back the way the loader does, and fail loudly rather than ship a pack the Mods page cannot show.
     with zipfile.ZipFile(out) as z:
