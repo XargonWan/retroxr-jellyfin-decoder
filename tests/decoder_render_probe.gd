@@ -84,6 +84,29 @@ func _run() -> void:
 	for i in 6:
 		await get_tree().process_frame
 	vp.get_texture().get_image().save_png("%s/remote_top.png" % out)
+	# the whole handset from above: nothing of RETRO XR may be left on it
+	var top_at := r.global_position + Vector3(0.0, 0.011, 0.0)
+	cam.position = top_at + Vector3(0.0, 0.30, 0.0)
+	cam.look_at(top_at, Vector3(0, 0, -1))
+	cam.fov = 30.0
+	for i in 6:
+		await get_tree().process_frame
+	vp.get_texture().get_image().save_png("%s/remote_full.png" % out)
+	# the IR end, where a mark of the maker could also sit
+	var tip_at := r.global_position + Vector3(0.0, 0.011, -0.085)
+	cam.position = tip_at + Vector3(0.0, 0.12, 0.03)
+	cam.look_at(tip_at, Vector3(0, 0, -1))
+	cam.fov = 25.0
+	for i in 6:
+		await get_tree().process_frame
+	vp.get_texture().get_image().save_png("%s/remote_tip.png" % out)
+	# the logo's edge from the side, low
+	cam.position = logo_at + Vector3(0.05, 0.02, 0.05)
+	cam.look_at(logo_at)
+	cam.fov = 25.0
+	for i in 6:
+		await get_tree().process_frame
+	vp.get_texture().get_image().save_png("%s/remote_logo_side.png" % out)
 	# TAB on the decoder, from where a player at a table stands: the menu must be IN VIEW.
 	var table := Node3D.new()
 	vp.add_child(table)
