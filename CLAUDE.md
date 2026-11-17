@@ -38,9 +38,11 @@ mod; phase 2 (only if the RetroXR developer approves) moves it into the base gam
 - `scripts/decoder_keys.gd` -- the five navigation keys (cross + OK, at the faceplate's RIGHT end, on the strip, as big as the model's own
   16 x 8.6 mm keys; the display ends before them): copies of the adopted PLAY VRButton with a box cap and a glyph; the transport row is the model's REW (skip back) / PLAY / FF (skip forward) / STOP caps. EJECT, PAUSE and
   REC are removed (their slots closed by `BlankPlate`). A cap's origin is its FACE: the box is moved back half its depth.
+- `mod_main.gd` -- registers both objects on the SPAWN menu's **Electronics** tab when the game has it (`game_has_tab`, read through the
+  `SpawnCatalog` script: naming a missing constant would not parse); an older game has one list, so the `tab` key is left out and they land on Objects.
 - `scripts/decoder_options_panel.gd` / `decoder_options_2d.gd` -- the TAB menu.
 
-## Tests (run_all.py = everything, 256 cases)
+## Tests (run_all.py = everything, 260 cases)
 
 Godot does not run in the Claude sandbox; go through the host (the user allows `flatpak-spawn --host`).
 **The host's `/tmp` is not the sandbox's**: anything the host must write for you to read (screenshots) goes in the home
