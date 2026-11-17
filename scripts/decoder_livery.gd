@@ -86,7 +86,8 @@ static func display_center() -> Vector3:
 ## The remote (the tv-remote model's frame): the big RETRO XR is a 46 x 6 mm quad on the TOP face, near the back
 ## end (the tip is at -Z). The logo lies on it, its top towards the tip so it reads from the holder's side.
 const REMOTE_LOGO_WIDTH := 0.038
-const REMOTE_LOGO_DEPTH := 0.003
+## Printed, not embossed: a raised edge a millimetre or two tall reads as a sticker on a 22 mm handset.
+const REMOTE_LOGO_DEPTH := 0.0007
 const REMOTE_LOGO_CENTER := Vector3(0.0, 0.01095, 0.0597)
 
 
@@ -131,7 +132,7 @@ static func dress(model: ApplianceModel) -> Node3D:
 ## The same for the handset: the RETRO XR on top gone, the logo in its place.
 static func dress_remote(model: ApplianceModel) -> Node3D:
 	_close_level_only(model)
-	var erased := erase_print(model, _remote_bands)
+	var erased := erase_print(model, _remote_bands, true)
 	var logo := LogoMesh.build(REMOTE_LOGO_WIDTH, REMOTE_LOGO_DEPTH)
 	if logo != null:
 		# face up (+Y), its top towards -Z: x stays, y -> -z, z -> +y
@@ -151,7 +152,10 @@ static func _close_level_only(model: ApplianceModel) -> void:
 
 ## The printed atlas of every level, with the old lines wiped to transparent in a copy. `bands_of(img)` says
 ## which rows (fractions of the height) to wipe for that atlas ([] = leave it). Returns how many were cleaned.
-static func erase_print(model: ApplianceModel, bands_of: Callable) -> int:
+## `hide_if_unreadable`: an atlas that cannot be read back (a VRAM-compressed texture a device cannot decompress)
+## cannot be wiped, so its print part is hidden whole rather than left saying RETRO XR (the handset's print holds
+## only that and the battery marks inside the bay).
+static func erase_print(model: ApplianceModel, bands_of: Callable, hide_if_unreadable := false) -> int:
 	var done := 0
 	for part in model.parts("BodyPrint"):
 		var mi := part as MeshInstance3D
@@ -161,10 +165,13 @@ static func erase_print(model: ApplianceModel, bands_of: Callable) -> int:
 		if mat == null or mat.albedo_texture == null:
 			continue
 		var img := mat.albedo_texture.get_image()
-		if img == null:
-			continue
-		if img.is_compressed():
+		if img != null and img.is_compressed():
 			img.decompress()
+		if img == null or img.is_compressed():
+			push_warning("[Jellyfin] %s: print atlas unreadable%s" % [mi.name, ", part hidden" if hide_if_unreadable else ""])
+			if hide_if_unreadable:
+				mi.visible = false
+			continue
 		img.convert(Image.FORMAT_RGBA8)
 		var bands: Array = bands_of.call(img)
 		if bands.is_empty():
